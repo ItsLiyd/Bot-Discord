@@ -19,13 +19,23 @@ const BOT_TOKEN = 'ISI-PAKE-TOKEN-BOT-LUWH'; // Ganti ini dengan token bot mu
 // Langkah 1: Buat Collection untuk menyimpan perintah
 
 client.commands = new Collection(); 
-
-// Langkah 2: Tambahkan perintah ke Collection
-client.commands.set(serverStatsCommand.data.name, serverStatsCommand);
 client.afkUsers = new Collection(); /// Menyimpan data AFK pengguna
 
-// Auto message
+client.commands.set(serverStatsCommand.data.name, serverStatsCommand);
+
+// buat auto message
 client.on('ready', () => {
+
+   // --- KODE STATUS BOT DIMULAI DI SINI ---
+    client.user.setPresence({
+        activities: [{
+            name: 'Kimir Impact', // Teks aktivitas
+            type: 0 // Jenis aktivitas (0 = Playing, 1 = Streaming, 2 = Listening, 3 = Watching, 5 = Competing)
+        }],
+        status: 'idle' // idle, dnd, invisible
+    });
+    // --- KODE STATUS BOT SELESAI DI SINI --- 
+
   console.log(`logged in as ${client.user.tag}`);
   autoChat(client);
   welcomer(client);
@@ -48,11 +58,6 @@ for (const file of commandFiles) {
     }
 }
 
-
-
-// ... (Bagian interactionCreate)
-
-// Langkah 3: Tangani interaksi (perintah slash) dari pengguna
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
@@ -83,8 +88,9 @@ client.on('messageCreate', async (message) => {
     } catch (error) {
       console.log('Gagal balikin nickname:', error);
     }
+
     // Kirim pesan balasan
-    const reply = await message.reply('Welkam back! Status AFK luwh udah dihapus');
+    const reply = await message.reply('Welcome back! Status AFK luwh udah dihapus.');
 
     // Hapus pesan balasan setelah 10 detik (10000 milidetik)
     setTimeout(() => {
@@ -97,9 +103,11 @@ client.on('messageCreate', async (message) => {
   message.mentions.users.forEach(user => {
     const afkMentioned = client.afkUsers.get(`${message.guild.id}-${user.id}`);
     if (afkMentioned) {
-      message.reply(`**${user.username}** lagi AFK\n**Alasan:** ${afkMentioned.reason}`);
+      message.reply(`**${user.username}** lagi AFK\n **Alasan:** ${afkMentioned.reason}`);
     }
   });
 });
 
-client.login(BOT_TOKEN); // Biarin aja wak. ga usa di otak atik baian ini :v
+
+
+client.login(BOT_TOKEN); // gausah di otak atik bagian ni
