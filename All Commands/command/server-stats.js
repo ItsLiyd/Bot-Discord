@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
+const devUsername = 'NAMA_DEVOLOPER_BOT';  // Ganti dengan username developer bot
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('server-stats')
@@ -46,7 +48,7 @@ module.exports = {
           inline: false,
         }
       )
-      .setFooter({ text: 'Bot comand developed by Pesatir_Handal' })
+      .setFooter({ text: 'made with love by $devUsername' })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
