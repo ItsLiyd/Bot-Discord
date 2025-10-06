@@ -6,7 +6,7 @@ module.exports = (client) => {
     client.on('guildMemberAdd', async member => {
         
         const welcomeChannelId = 'CHANNEL_ID_LU'; // Ganti dengan ID channel selamat datang
-        const rulesChannelId = 'CHANNEL_BUAT_RULES_MU';     // Ganti dengan ID channel peraturan
+        const rulesChannelId = 'CHANNEL_BUAT_RULES_MU';  // Ganti dengan ID channel peraturan
         const bannerImageUrl = 'URL_GAMBAR';   // Ganti dengan URL gambar banner kamu
         const devUsername = 'NAMA_DEVOLOPER_BOT';  // Ganti dengan username developer bot
 
@@ -33,3 +33,4 @@ module.exports = (client) => {
     });
 
 };
+
