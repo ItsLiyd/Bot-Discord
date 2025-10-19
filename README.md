@@ -5,7 +5,7 @@ Btw Tao istri gwa :b
 
 # cara install code gwecj
 1. ketik di bash atau apalah nama nya itu:
-    > npm install discord.js @sapphire/framework better-sqlite3
-2. buat kirim pesan otomatis:
-    > npm install node-cron
+    > npm init -y
+2. buat kebutuhan yg lain
+    > npm install discord.js @discordjs/voice play-dl node-cron rss-parser better-sqlite3 node-fetch
 
