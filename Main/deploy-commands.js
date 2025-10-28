@@ -17,7 +17,7 @@ for (const file of commandFiles) {
   if ('data' in command && 'execute' in command) {
     commands.push(command.data.toJSON());
   } else {
-    console.log(`[WARNING] Perintah di ${filePath} tidak memiliki properti "data" atau "execute" yang dibutuhkan.`);
+    console.log(`[WARNING] Perintah di ${filePath} kaga punya properti "data" atau "execute" yang dibutuhin.`);
   }
 }
 
@@ -27,7 +27,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 // Jalankan fungsi untuk mendaftarkan perintah
 (async () => {
   try {
-    console.log(`Mulai memuat ${commands.length} perintah aplikasi (/)`);
+    console.log(`Mulai memuat ${commands.length} slash commands (/)`);
 
     // MENGGUNAKAN process.env.DISCORD_CLIENT_ID
     const data = await rest.put(
@@ -35,7 +35,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
       { body: commands },
     );
 
-    console.log(`Berhasil memuat ${data.length} perintah aplikasi (/)!`);
+    console.log(`Swelamoat! Kita berhasil memuat ${data.length} slash commands (/)!`);
   } catch (error) {
     console.error(error);
   }
