@@ -65,11 +65,11 @@ module.exports = {
 
         // Buat Embed
         const embed = new EmbedBuilder()
-            .setColor(0x00A0FF) // Warna Biru
+            .setColor(0xFF0000) // Warna merah, warna cinta 😹
             .setTitle(`🚶 Daftar ${count} Pengguna yang Sedang AFK`)
             .setDescription(afkList.join('\n\n'))
             .setTimestamp()
-            .setFooter({ text: `TawBot AFK System` });
+            .setFooter({ text: `"nama bot" AFK System` });
 
         await interaction.reply({ embeds: [embed] });
     },
