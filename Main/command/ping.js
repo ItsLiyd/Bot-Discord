@@ -11,7 +11,7 @@ module.exports = {
     const pingEmbed = new EmbedBuilder()
       .setColor(0xff0000) // Anda bisa mengganti kode warna ini
       .setTitle('# Pong!')
-      .setThumbnail('https://i.supaimg.com/3dbdbad8-3183-4c8e-86ef-8bbb7d0de7cb.png')
+      .setThumbnail(interaction.client.user.displayAvatarURL())
       .addFields(
         { name: '🔴 **Cluster**:', value: `${sent.createdTimestamp - interaction.createdTimestamp}ms (avg)`, inline: false},
         { name: '🔴 **Shard**:', value: `${interaction.client.ws.ping}ms`, inline: false},
@@ -20,3 +20,4 @@ module.exports = {
     await interaction.editReply({ content: ' ', embeds: [pingEmbed] });
   },
 };
+
