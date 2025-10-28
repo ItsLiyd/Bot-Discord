@@ -34,7 +34,7 @@ module.exports = {
         }
 
         await interaction.reply({
-            content: `<:arrow2:1414259950191906999> **Lu sekarang sudah afk!**\n<:blank:1271074823552110676> **Alasan:** ${reason}`,
+            content: `>> **Lu sekarang sudah afk!**\n>> **Alasan:** ${reason}`,
             ephemeral: false
         });
     },
