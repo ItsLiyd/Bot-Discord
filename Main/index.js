@@ -1,7 +1,12 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { Client, GatewayIntentBits, Collection, Guild } = require('discord.js');
+// --- BARIS TAMBAHAN: Muat Database ---
+// ASUMSI: Menggunakan quick.db untuk json.sqlite
+const db = require('quick.db');
+// -------------------------------------
+
+const { Client, GatewayIntentBits, Collection, Guild, EmbedBuilder } = require('discord.js');
 const serverStatsCommand = require('./command/server-stats.js');
 const autoChat = require('./auto-message/auto-chat.js');
 const welcomer = require('./auto-message/welcomer.js');
@@ -21,7 +26,8 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-client.afkUsers = new Collection(); /// Menyimpan data AFK pengguna
+// --- BARIS DIHAPUS: client.afkUsers = new Collection(); ---
+// Penyimpanan AFK sekarang menggunakan quick.db (json.sqlite)
 
 // Langkah 2: Tambahkan perintah ke Collection
 client.commands.set(serverStatsCommand.data.name, serverStatsCommand);
@@ -33,12 +39,12 @@ client.on('ready', () => {
   // --- KODE STATUS BOT DIMULAI DI SINI ---
   client.user.setPresence({
     activities: [{
-      name: 'SUBSCRIBE PESATIR_HANDAL', // Teks aktivitas
+      name: 'Kimkir Impact', // Teks aktivitas
       type: 0 // 0 = Playing
     }],
     status: 'idle' // <--- INI PENTING! Mengubah warna menjadi Kuning/Idle
   });
-  // --- KODE STATUS BOT SELESAI DI SINI ---
+  // --- =============================== ---
 
   autoReminder(client);
   autoChat(client);
@@ -62,6 +68,9 @@ for (const file of commandFiles) {
   }
 }
 
+
+// ... (Bagian interactionCreate)
+
 // Langkah 3: Tangani interaksi (perintah slash) dari pengguna
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
@@ -78,35 +87,60 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-/// Untuk AFK commands
+// ----------------------------------------------------------------------------------
+// ------------------------ STRUCTURE AFK - UPDATE ----------------------------------
+// ----------------------------------------------------------------------------------
 client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
+  if (message.author.bot || !message.guild) return;
 
-  const afkInfo = client.afkUsers.get(`${message.guild.id}-${message.author.id}`);
+  const userId = message.author.id;
+  const guildId = message.guild.id;
+  const dbKey = `${guildId}_${userId}`;
 
-  // Cek apakah user sendiri sedang AFK
-  if (afkInfo) {
-    client.afkUsers.delete(`${message.guild.id}-${message.author.id}`);
-    try {
-      await message.member.setNickname(afkInfo.originalNickname);
-    } catch (error) {
-      console.log('Gagal balikin nickname:', error);
+  // --- Bagian A: Deteksi Kembali AFK (Auto-Return) ---
+  const afkData = db.get(dbKey);
+
+  if (afkData) {
+    // 1. Hapus data AFK dari DB
+    db.delete(dbKey);
+
+    // 2. Kembalikan Nickname Asli
+    const member = message.member;
+    // Ambil nickname asli yang telah disimpan oleh afk.js
+    const originalNickname = afkData.original_nickname;
+
+    // Cek Nickname saat ini vs Nickname Asli
+    if (member.nickname && member.nickname.startsWith('[AFK]')) {
+      // Jika bot gagal mengembalikan nickname, ini biasanya karena role bot lebih rendah.
+      await member.setNickname(originalNickname || null, 'Kembali dari AFK').catch(error => {
+        console.error("Gagal balikin nickname:", error);
+      });
     }
-    // Kirim pesan balasan
-    const reply = await message.reply('Welcome back! Status afk mu telah dihapus');
 
-    // Hapus pesan balasan setelah 10 detik (10000 milidetik)
+    // 3. Kirim pesan sambutan 
+    const reply = await message.reply(`✅ Welcome back, ${message.author}! Status AFK Anda telah dihapus. `);
+
+    // Hapus pesan balasan setelah 10 detik (seperti yang Anda lakukan)
     setTimeout(() => {
-      // Gunakan delete() pada pesan balasan
       reply.delete().catch(err => console.error("Gagal menghapus pesan 'welcome back':", err));
     }, 10000);
   }
 
-  // Cek apakah mention user yang AFK
-  message.mentions.users.forEach(user => {
-    const afkMentioned = client.afkUsers.get(`${message.guild.id}-${user.id}`);
-    if (afkMentioned) {
-      message.reply(`>> **${user.username}** lagi AFK\n>>**Alasan:** ${afkMentioned.reason}`);
+  // --- Bagian B: Deteksi Mention AFK (Peringatan) ---
+  message.mentions.users.forEach(mentionedUser => {
+    const mentionedAfkKey = `${guildId}_${mentionedUser.id}`;
+    const mentionedAfkData = db.get(mentionedAfkKey); // Cek di DB
+
+    if (mentionedAfkData) {
+      const reason = mentionedAfkData.reason;
+      const timestamp = mentionedAfkData.afk_timestamp; // Diambil dari DB (Sistem AFK Baru)
+
+      // Buat embed peringatan AFK yang rapi
+      const afkWarningEmbed = new EmbedBuilder()
+        .setColor('#FFC300') // Kuning
+        .setDescription(`⚠️ **${mentionedUser.username}** lagi AFK!\n\n**Alasan:** ${reason}\n**AFK Sejak:** <t:${Math.floor(timestamp / 1000)}:R>`); // Format Waktu Relatif
+
+      message.reply({ embeds: [afkWarningEmbed], ephemeral: false }).catch(console.error);
     }
   });
 });
