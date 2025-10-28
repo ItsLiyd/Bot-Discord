@@ -3,9 +3,8 @@ Ini adalah tempat gwa share kodingan yang gw buat.
 Maafin kalo ada yang keliatan aga-aga, kan saya masih baru disini.
 Btw Tao istri gwa :b
 
-# cara install code gwecj
+# 🛠️ Cara Install dan Jalankan Code Gwa (Bash Command)
 1. ketik di bash atau apalah nama nya itu:
-    > npm init -y
+    > npm install discord.js dotenv node-cron @discordjs/rest @discordjs/builders
 2. buat kebutuhan yg lain
-    > npm install discord.js @discordjs/voice play-dl node-cron rss-parser better-sqlite3 node-fetch
-
+    > node deploy-commands.js
