@@ -1,5 +1,6 @@
 # Bot-Discord 🤖
-
+V 2.3
+> **➿ Changelog:**<br>- Memperbaiki Bug AFK<br>- Pesan AFK tetap ada walaupun bot di restart<br>- Sudah terhubung ke MongoDB buat nyimpen data AFK
 Ini adalah tempat **gwa** share kodingan bot yang gw buat.
 
 Jujur aja, maafin kalo kodingannya ada yang keliatan **"aga-aga"** atau berantakan, soalnya saya masih baru disini (masih belajar, Bang). Tapi tenang, fiturnya jalan kok!
