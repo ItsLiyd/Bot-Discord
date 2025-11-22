@@ -1,4 +1,4 @@
-// bhuat ngetest test-mongo.js doang, siapa tawu butuh 
+// bhuat ngetest test-mongo.js doang, siapa tawu butuh ini :v
 // jalankan: node test-mongo.js
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -24,4 +24,5 @@ const mongoose = require('mongoose');
     console.error(err);
     process.exit(1);
   }
+
 })();
