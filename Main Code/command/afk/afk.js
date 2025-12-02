@@ -72,16 +72,16 @@ module.exports = {
       if (interaction.member && interaction.guild.members.me.permissions.has('ManageNicknames')) {
         await interaction.member.setNickname(newNickname);
       } else if (interaction.member) {
-        // coba setNickname tapi kalau error jangan crash
+        // coba setNickname tapi kalau error engga crash ato apalah itu sebutannya 
         await interaction.member.setNickname(newNickname).catch(() => null);
       }
     } catch (error) {
-      // permission error atau role hierarchy -> log saja
+      // pesan permision error
       console.log('Gagal ubah nickname (ga punya permision gw woilah 😹):', error?.message || error);
     }
 
     await interaction.reply({
-      content: `**Lu sekarang sudah afk!**\n**Alasan:** ${reason}`,
+      content: `**Sekarang sekarang sudah afk!**\n**Alasan:** ${reason}`,
       ephemeral: false // biar semua orang liat
     });
   },
