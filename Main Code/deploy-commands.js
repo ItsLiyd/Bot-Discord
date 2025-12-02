@@ -8,13 +8,13 @@ const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
 
 if (!token || !clientId) {
-  console.error('Missing DISCORD_TOKEN atau DISCORD_CLIENT_ID di .env');
+  console.error('DISCORD_TOKEN atau DISCORD_CLIENT_ID ga ada di .env');
   process.exit(1);
 }
 
 const rest = new REST({ version: '10' }).setToken(token);
 
-// baca file command secara rekursif (mendukung subfolder)
+// baca file command secara rekursif (mendukung subfolder secara teory, kalo ngebug yh.... besok-besok gw fix :v
 function readCommandsRecursive(dir) {
   const commands = [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -74,7 +74,7 @@ const commands = readCommandsRecursive(commandsPath);
     }
     process.exit(0);
   } catch (error) {
-    console.error('Gagal mendaftarkan command:', error);
+    console.error('Gagal dapetin command:', error);
     process.exit(1);
   }
 })();
