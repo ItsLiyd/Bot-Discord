@@ -30,7 +30,7 @@ module.exports = {
 
     // Ambil reason jika ada
     const rawReason = interaction.options.getString('reason');
-    const reason = rawReason || 'nih user ga punya alasan njir 😹';
+    const reason = rawReason || 'nih user ga ada alasan cik 😹';
     const userId = interaction.user.id;
     const guildId = interaction.guild.id;
 
