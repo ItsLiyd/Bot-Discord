@@ -1,0 +1,99 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:recommended",
+		":dependencyDashboard",
+		":disableRateLimiting",
+		":pinOnlyDevDependencies",
+		"npm:unpublishSafe",
+		"docker:pinDigests",
+		"helpers:pinGitHubActionDigestsToSemver",
+		"security:openssf-scorecard"
+	],
+	"ignorePresets": [
+		":semanticPrefixFixDepsChoreOthers",
+		"group:semantic-releaseMonorepo",
+		"group:commitlintMonorepo"
+	],
+	"schedule": ["before 5am every weekday", "every weekend"],
+	"lockFileMaintenance": {
+		"enabled": true,
+		"automerge": true,
+		"automergeType": "branch"
+	},
+	"labels": ["dependencies"],
+	"osvVulnerabilityAlerts": true,
+	"packageRules": [
+		{
+			"matchPackageNames": ["*"],
+			"semanticCommitType": "chore",
+			"semanticCommitScope": "deps",
+			"schedule": "* * 10,25 * *"
+		},
+		{
+			"matchDepTypes": ["devDependencies"],
+			"matchUpdateTypes": ["minor", "patch", "pin", "pinDigest"],
+			"automerge": true,
+			"automergeType": "branch"
+		},
+		{
+			"matchDepTypes": ["dependencies"],
+			"semanticCommitType": "build",
+			"semanticCommitScope": "deps",
+			"schedule": "at any time"
+		},
+		{
+			"matchDepTypes": ["dependencies"],
+			"matchUpdateTypes": ["minor", "patch"],
+			"semanticCommitType": "build",
+			"automerge": true,
+			"automergeType": "branch"
+		},
+		{
+			"matchManagers": ["github-actions"],
+			"semanticCommitType": "chore",
+			"semanticCommitScope": "action",
+			"schedule": "* * 10,25 * *"
+		},
+		{
+			"matchManagers": ["github-actions"],
+			"matchUpdateTypes": ["minor", "patch", "pin", "pinDigest"],
+			"automerge": true,
+			"automergeType": "branch"
+		},
+		{
+			"extends": ["monorepo:semantic-release"],
+			"groupName": "semantic-release related packages",
+			"matchUpdateTypes": ["digest", "patch", "minor", "major"]
+		},
+		{
+			"extends": ["monorepo:commitlint"],
+			"groupName": "semantic-release related packages",
+			"matchUpdateTypes": ["digest", "patch", "minor", "major"]
+		},
+		{
+			"groupName": "semantic-release related packages",
+			"matchUpdateTypes": ["digest", "patch", "minor", "major"],
+			"matchPackageNames": [
+				"/@insurgent/conventional-changelog-preset/",
+				"/@insurgent/commitlint-config/"
+			]
+		},
+		{
+			"extends": ["packages:linters"],
+			"groupName": "linters",
+			"addLabels": ["linters"]
+		},
+		{
+			"extends": ["packages:test"],
+			"groupName": "tests",
+			"addLabels": ["tests"]
+		},
+		{
+			"matchDepTypes": ["devDependencies"],
+			"matchUpdateTypes": ["minor", "patch"],
+			"automerge": true,
+			"automergeType": "branch"
+		}
+	]
+}

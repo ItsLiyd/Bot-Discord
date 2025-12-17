@@ -1,0 +1,25 @@
+{
+  "name": "tawbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^1.11.3",
+    "@discordjs/rest": "^2.6.0",
+    "better-sqlite3": "^12.2.0",
+    "discord-api-types": "^0.38.22",
+    "discord.js": "^14.22.0",
+    "dotenv": "^17.2.3",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.20.0",
+    "node-cron": "^4.2.1",
+    "quick.db": "^9.1.7",
+    "sqlite3": "^5.1.7"
+  }
+}
