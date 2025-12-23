@@ -63,7 +63,9 @@ node reset-command.js
 ```
 ini buat hapus semua slash command yg terdaftar, lalu daftarin ulang menggunakan tutorial di nomor **4** yh
 
-<p align="center">📜 Lisensi</p>
+
+
+<h3 align="center">📜 Lisensi</h3>
 <p align="center">Proyek ini menggunakan lisensi GPL-3.0. Kamu bebas edit dan kembangkan lagi kodingannya! (kecuali buat bitma)</p>
 
 <p align="center"> Dibuat dengan ❤️ oleh <b>Pesatir_Handal</b> </p>
