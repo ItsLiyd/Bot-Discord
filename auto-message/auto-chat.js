@@ -17,10 +17,11 @@ module.exports = (client) => {
     // │ │ │ │ │
     // * * * * *
 
-    cron.schedule('* * * * *', async () => { // Ganti dengan jadwal yang diinginkan
+    cron.schedule('45 18 * * 5', async () => { // Ganti dengan jadwal yang diinginkan
         try {
             const channel = await client.channels.fetch(channelId);
             if (channel) {
+                // Gunakan messageContent yang sudah didefinisikan di atas
                 channel.send(messageContent); 
                 console.log('Pesan otomatis berhasil dikirim.');
             } else {

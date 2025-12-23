@@ -1,89 +1,105 @@
-const { SlashCommandBuilder } = require('discord.js');
-// sesuaikan path jika models/afkUser ada di tempat lain
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const AfkUser = require('../../models/afkUser');
 
+// Fungsi pembantu format durasi
+function formatDuration(ms) {
+    const seconds = Math.floor(ms / 1000);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const parts = [];
+    if (days) parts.push(`${days} hari`);
+    if (hours) parts.push(`${hours} jam`);
+    if (minutes) parts.push(`${minutes} menit`);
+    return parts.length === 0 ? 'baru saja' : parts.join(', ');
+}
+
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('afk')
-    .setDescription('ngubah lu jadi AFK')
-    .addStringOption(option =>
-      option.setName('reason')
-        .setDescription('alasan kenapa lu afk')
-        .setRequired(false)),
+    data: new SlashCommandBuilder()
+        .setName('afk')
+        .setDescription('Sistem manajemen AFK')
 
-  async execute(interaction) {
-    if (!interaction.guild) {
-      return interaction.reply({ content: 'perintah ini hanya bisa dipakai di server.', ephemeral: true });
-    }
+        // Sub-command SET
+        .addSubcommand(sub =>
+            sub.setName('set')
+                .setDescription('Ngubah status lu jadi AFK')
+                .addStringOption(opt => opt.setName('reason').setDescription('Alasan lu AFK').setRequired(false))
+        )
+        // Sub-command LIST
+        .addSubcommand(sub =>
+            sub.setName('list')
+                .setDescription('Nampilin daftar orang yang lagi AFK')
+        )
+        // Sub-command DEL
+        .addSubcommand(sub =>
+            sub.setName('del')
+                .setDescription('Hapus status AFK lu secara manual')
+        ),
 
-    // DEBUG LOGS: tampilkan opsi yang dikirim ke bot
-    try {
-      console.log('=== /afk invoked ===');
-      console.log('User:', interaction.user.tag, interaction.user.id);
-      console.log('Guild:', interaction.guild.id, interaction.guild.name);
-      // options.data berisi array opsi yang dikirim (name, type, value)
-      console.log('interaction.options.data:', JSON.stringify(interaction.options.data));
-      console.log("interaction.options.getString('reason'):", interaction.options.getString('reason'));
-    } catch (logErr) {
-      console.error('Error saat logging interaction options:', logErr);
-    }
+    async execute(interaction) {
+        if (!interaction.guild) return interaction.reply({ content: 'Main di server aja bg!', ephemeral: true });
+        
+        const sub = interaction.options.getSubcommand();
+        const userId = interaction.user.id;
+        const guildId = interaction.guild.id;
 
-    // Ambil reason — fallback kalau null
-    const rawReason = interaction.options.getString('reason');
-    const reason = rawReason || 'tidak ada alasan spesifik';
-    const userId = interaction.user.id;
-    const guildId = interaction.guild.id;
+        // --- LOGIC SET AFK ---
+        if (sub === 'set') {
+            const reason = interaction.options.getString('reason') || 'tidak ada alasan spesifik';
+            const afkData = {
+                guildId, userId, reason,
+                timestamp: Date.now(),
+                originalNickname: interaction.member?.nickname || interaction.user.username
+            };
 
-    const afkData = {
-      guildId,
-      userId,
-      reason,
-      timestamp: Date.now(),
-      originalNickname: interaction.member?.nickname || interaction.user.username
-    };
+            await AfkUser.findOneAndUpdate({ guildId, userId }, { $set: afkData }, { upsert: true });
+            interaction.client.afkUsers.set(`${guildId}-${userId}`, afkData);
 
-    try {
-      // simpan / update ke MongoDB (upsert)
-      await AfkUser.findOneAndUpdate(
-        { guildId, userId },
-        { $set: afkData },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
+            // Ubah Nickname
+            try {
+                const newNick = `[AFK] ${afkData.originalNickname}`.substring(0, 32);
+                if (interaction.member.manageable) await interaction.member.setNickname(newNick);
+            } catch (e) { console.log('Gagal ubah nick:', e.message); }
 
-      // update cache lokal supaya fitur mention & messageCreate langsung jalan
-      interaction.client.afkUsers.set(`${guildId}-${userId}`, {
-        reason: afkData.reason,
-        timestamp: afkData.timestamp,
-        originalNickname: afkData.originalNickname
-      });
-    } catch (err) {
-      console.error('Gagal simpan AFK ke Data Base:', err);
-      // tetap update cache walau DB error (opsional)
-      interaction.client.afkUsers.set(`${guildId}-${userId}`, {
-        reason: afkData.reason,
-        timestamp: afkData.timestamp,
-        originalNickname: afkData.originalNickname
-      });
-    }
+            return interaction.reply({
+                content: `<:arrow2:1414259950191906999> **Lu sekarang AFK!**\n> **Alasan:** ${reason}`
+            });
+        }
 
-    // ubah nickname untuk menandakan AFK (jika punya permission)
-    try {
-      const baseName = interaction.member?.nickname || interaction.user.username;
-      const newNickname = `[AFK] ${baseName}`.substring(0, 32);
-      if (interaction.member && interaction.guild.members.me.permissions.has('ManageNicknames')) {
-        await interaction.member.setNickname(newNickname);
-      } else if (interaction.member) {
-        // coba setNickname tapi kalau error jangan crash
-        await interaction.member.setNickname(newNickname).catch(() => null);
-      }
-    } catch (error) {
-      // permission error atau role hierarchy -> log saja
-      console.log('Gagal ubah nickname (mungkin permission):', error?.message || error);
-    }
+        // --- LOGIC LIST AFK ---
+        if (sub === 'list') {
+            await interaction.deferReply();
+            const docs = await AfkUser.find({ guildId }).sort({ timestamp: -1 }).limit(10).lean();
+            
+            if (!docs.length) return interaction.editReply('Ga ada orang AFK bwanhg :v');
 
-    await interaction.reply({
-      content: `**Lu sekarang sudah afk!**\n**Alasan:** ${reason}`,
-      ephemeral: false
-    });
-  },
+            const lines = docs.map((d, i) => {
+                const dur = formatDuration(Date.now() - d.timestamp);
+                return `**${i + 1}. <@${d.userId}>**\n> 📝 ${d.reason}\n> ⏳ ${dur}`;
+            });
+
+            const embed = new EmbedBuilder()
+                .setTitle('🚶 Daftar Pengguna AFK')
+                .setColor(0xff0000)
+                .setDescription(lines.join('\n\n'))
+                .setFooter({ text: 'TawBot AFK System' });
+
+            return interaction.editReply({ embeds: [embed] });
+        }
+
+        // --- LOGIC DEL AFK ---
+        if (sub === 'del') {
+            const data = await AfkUser.findOneAndDelete({ guildId, userId });
+            interaction.client.afkUsers.delete(`${guildId}-${userId}`);
+
+            if (!data) return interaction.reply({ content: 'Lu emang lagi gak AFK bg...', ephemeral: true });
+
+            // Balikin Nickname
+            try {
+                if (interaction.member.manageable) await interaction.member.setNickname(data.originalNickname);
+            } catch (e) { console.log('Gagal reset nick:', e.message); }
+
+            return interaction.reply({ content: '✅ Status AFK lu udah dihapus!' });
+        }
+    },
 };

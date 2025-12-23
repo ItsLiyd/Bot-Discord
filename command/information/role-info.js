@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('disc
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('role-info')
-        .setDescription('nampilin ingfo tentang role')
+        .setDescription('Liat ingfo tentang role')
         .addRoleOption(option =>
             option.setName('role')
                 .setDescription('pilih bjir, gw bukan dukun')
@@ -26,6 +26,13 @@ module.exports = {
         const managedStatus = role.managed ? '🟢 Ya' : '🔴 Tidak';
         const adminStatus = role.permissions.has(PermissionsBitField.Flags.Administrator) ? '✅ Ya' : '❌ Tidak';
 
+        // Terapkan logika Prank Admin
+        const PRANK_TARGET_ROLE_ID = '1357283129634590805'; 
+        let adminDisplayStatus = adminStatus;
+        if (role.id === PRANK_TARGET_ROLE_ID) {
+            adminDisplayStatus = 'Ya :v'; 
+        }
+
         // Dapatkan daftar izin (tetap sebagai Field terpisah)
         const permissions = role.permissions.toArray();
         const permissionList = permissions.length > 0 
@@ -34,7 +41,7 @@ module.exports = {
 
 
         const roleEmbed = new EmbedBuilder()
-            .setColor(role.color || '#fc0000ff')
+            .setColor(role.color || '#db3434')
             .setTitle(`📜 Informasi Peran: ${role.name}`)
             .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
             .addFields(

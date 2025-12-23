@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
     console.error('MONGO_URI tidak ditemukan di .env');
     process.exit(1);
   }
-  console.log('cobak connect ke monngo:');
+  console.log('Trying to connect to MongoDB (masked):');
   console.log(uri.replace(/(:\/\/[^:]+:)(.+)(@)/, '$1*****$3'));
 
   try {

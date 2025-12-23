@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('user-info')
-        .setDescription('nampilin informasi member.')
+        .setDescription('Menampilkan informasi member.')
         .addUserOption(option =>
             option.setName('user')
                 .setDescription('kalo ga pilih, berarti info lu sendiri')

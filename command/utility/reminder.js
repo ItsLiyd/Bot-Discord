@@ -16,13 +16,13 @@ module.exports = {
                         .setRequired(true))
                 .addIntegerOption(option =>
                     option.setName('hour')
-                        .setDescription('Jam (0-23 WIB)')
+                        .setDescription('Jam (0-23)')
                         .setRequired(true)
                         .setMinValue(0) 
                         .setMaxValue(23))
                 .addIntegerOption(option =>
                     option.setName('minute')
-                        .setDescription('Menit (0-59) WIB')
+                        .setDescription('Menit (0-59)')
                         .setRequired(false)
                         .setMinValue(0)
                         .setMaxValue(59))

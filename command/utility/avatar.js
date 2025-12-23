@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('avatar')
-        .setDescription('nampilin avatar user')
+        .setDescription('Menampilkan avatar user')
         .addUserOption(option =>
             option.setName('user')
                 .setDescription('Pilih orangnya bg, kalo ga pilih berarti lu')

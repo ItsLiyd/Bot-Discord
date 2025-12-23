@@ -16,7 +16,7 @@ module.exports = (client) => {
         if (!channel) return;
 
         const welcomeEmbed = new EmbedBuilder()
-            .setColor('#FF0000') // warna merah, karena my bini merah 😋
+            .setColor('#FF0000')
             .setTitle('NEW MEMBER 📢')
             .setDescription(
                 `Welcome <@${member.user.id}> to **${member.guild.name}**!` +

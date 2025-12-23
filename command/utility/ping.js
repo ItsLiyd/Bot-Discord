@@ -15,14 +15,14 @@ module.exports = {
 
     // Tentukan emoji dan warna berdasarkan kecepatan (Indikator Status)
     let statusWarna = '#2ecc71'; // Hijau (Cepat)
-    let statusEmoji = '🟢 Cepat';
+    let statusEmoji = '🟢 Sangat Cepat';
 
     if (latensiWS > 200) {
       statusWarna = '#f1c40f'; // Kuning (Sedang) 
       statusEmoji = '🟡 Sedang';
     } else if (latensiWS > 500) {
       statusWarna = '#e74c3c'; // Merah (Lag)
-      statusEmoji = '🔴 Lemot cik, internet cepat buat apa?';
+      statusEmoji = '🔴 Lambat';
     }
 
     // Hitung Uptime Bot (Opsional tapi keren)

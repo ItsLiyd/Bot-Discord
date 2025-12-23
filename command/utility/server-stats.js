@@ -46,7 +46,7 @@ module.exports = {
           inline: false,
         }
       )
-      .setFooter({ text: `ingfo server ${guild.name}` })
+      .setFooter({ text: 'Bot comand developed by Pesatir_Handal' })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });

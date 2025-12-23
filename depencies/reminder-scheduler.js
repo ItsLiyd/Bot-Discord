@@ -30,7 +30,7 @@ module.exports = (client) => {
                     .setTitle('🔔 ALARM PENGINGAT!')
                     .setDescription(`**Pesan:** ${reminder.message}`)
                     .setTimestamp(reminder.targetTime)
-                    .setFooter({ text: 'Pengingat otomatis dari bot.' });
+                    .setFooter({ text: 'TawBot System' });
                     
                 // --- A. KIRIM KE DM PENGGUNA ---
                 try {

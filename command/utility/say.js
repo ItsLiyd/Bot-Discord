@@ -1,108 +1,62 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const Reminder = require('../../models/reminder');
+const { SlashCommandBuilder } = require('discord.js');
+
+const MEMBER_ID = process.env.OWNER_ID; 
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('reminder')
-        .setDescription('buat ngingetin lu nanti')
-        // SUB-COMMAND: SET
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('set')
-                .setDescription('Mengatur pengingat baru')
-                .addStringOption(option =>
-                    option.setName('message')
-                        .setDescription('Isi pesan reminder')
-                        .setRequired(true))
-                .addIntegerOption(option =>
-                    option.setName('hour')
-                        .setDescription('Jam (0-23)')
-                        .setRequired(true)
-                        .setMinValue(0) 
-                        .setMaxValue(23))
-                .addIntegerOption(option =>
-                    option.setName('minute')
-                        .setDescription('Menit (0-59)')
-                        .setRequired(false)
-                        .setMinValue(0)
-                        .setMaxValue(59))
+        .setName('roamin')
+        .setDescription('Mengirim pesan sebagai bot (hanya untuk anggota tertentu)')
+        .addStringOption(option =>
+            option
+                .setName('message')
+                .setDescription('Isi pesan yang ingin dikirim bot')
+                .setRequired(true)
         )
-        // SUB-COMMAND: CANCEL
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('cancel')
-                .setDescription('hapus semua pengingat')
+        .addStringOption(option =>
+            option
+                .setName('reply_link')
+                .setDescription('Link pesan jika ingin membalas (reply) pesan tertentu')
+                .setRequired(false)
         ),
 
     async execute(interaction) {
-        const sub = interaction.options.getSubcommand();
-
-        // --- LOGIKA SET REMINDER ---
-        if (sub === 'set') {
-            await interaction.deferReply({ ephemeral: true });
-            const messageInput = interaction.options.getString('message');
-            const hour = interaction.options.getInteger('hour');
-            const minute = interaction.options.getInteger('minute') || 0;
-
-            // Perbaikan Waktu ke WIB
-            const now = new Date();
-            // Paksa offset ke +7 jam (WIB)
-            const wibOffset = 7 * 60 * 60 * 1000;
-            const nowWIB = new Date(now.getTime() + wibOffset);
-
-            let targetTimeWIB = new Date(now.getTime() + wibOffset);
-            targetTimeWIB.setHours(hour, minute, 0, 0);
-
-            // Jika jam sudah lewat di hari ini, pindah ke besok
-            if (targetTimeWIB <= nowWIB) {
-                targetTimeWIB.setDate(targetTimeWIB.getDate() + 1);
-            }
-
-            // Kembalikan ke UTC untuk disimpan di DB dan dijadikan timestamp Discord
-            const finalTargetTime = new Date(targetTimeWIB.getTime() - wibOffset);
-            const timestamp = Math.floor(finalTargetTime.getTime() / 1000);
-
-            try {
-                await Reminder.create({
-                    userId: interaction.user.id,
-                    channelId: interaction.channelId,
-                    guildId: interaction.guildId,
-                    message: messageInput,
-                    targetTime: finalTargetTime,
-                    isSent: false,
-                });
-
-                const embed = new EmbedBuilder()
-                    .setColor('#ff0000')
-                    .setTitle('🔔 Pengingat Diatur!')
-                    .setDescription(`**Pesan:** ${messageInput}\n**Waktu:** <t:${timestamp}:F>`)
-                    .setFooter({ text: 'Zona waktu: Asia/Jakarta (WIB)' });
-
-                return await interaction.editReply({ embeds: [embed] });
-            } catch (e) {
-                console.error(e);
-                return await interaction.editReply('Gagal simpan ke database bg.');
-            }
+        // Cek apakah command digunakan di dalam guild
+        if (!interaction.inGuild()) {
+            return interaction.reply({ content: 'Ga bisa digunain di sini njir 😹', ephemeral: true });
         }
 
-        // --- LOGIKA CANCEL REMINDER ---
-        if (sub === 'cancel') {
-            await interaction.deferReply({ ephemeral: true });
-            try {
-                const result = await Reminder.deleteMany({ 
-                    userId: interaction.user.id, 
-                    isSent: false 
-                });
+        // Cek ID Pengguna
+        if (interaction.user.id !== MEMBER_ID) {
+            return interaction.reply({ content: 'Lu ga ada ijin bg 😹', ephemeral: true });
+        }
 
-                if (result.deletedCount === 0) {
-                    return interaction.editReply('Lu nggak punya pengingat yang aktif bg.');
-                }
+        const text = interaction.options.getString('message');
+        const link = interaction.options.getString('reply_link');
 
-                return interaction.editReply(`✅ Berhasil membatalkan **${result.deletedCount}** pengingat lu.`);
-            } catch (e) {
-                console.error(e);
-                return await interaction.editReply('Gagal hapus pengingat.');
+        // Gunakan deferReply agar interaksi tidak timeout
+        await interaction.deferReply({ ephemeral: true });
+
+        try {
+            if (!link) {
+                // Kirim pesan biasa ke channel tempat command diketik
+                await interaction.channel.send({ content: text });
+            } else {
+                // Logika membalas pesan berdasarkan Link
+                // Contoh link: https://discord.com/channels/GUILD_ID/CHANNEL_ID/MESSAGE_ID
+                const parts = link.split('/');
+                const messageId = parts[parts.length - 1];
+                const channelId = parts[parts.length - 2];
+
+                const channel = await interaction.client.channels.fetch(channelId);
+                const targetMessage = await channel.messages.fetch(messageId);
+
+                await targetMessage.reply({ content: text });
             }
+
+            await interaction.editReply({ content: '✅ Pesan berhasil dikirim!' });
+        } catch (error) {
+            console.error(error);
+            await interaction.editReply({ content: '❌ Gagal kirim pesan. Pastikan link valid dan bot punya izin di channel tersebut.' });
         }
     },
 };

@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
-        .setDescription('nampilin daftar perintah'),
+        .setDescription('Menampilkan daftar perintah bot dengan dekorasi lengkap'),
 
     async execute(interaction) {
         // Ambil banner bot secara otomatis
@@ -16,16 +16,10 @@ module.exports = {
             return cmd ? `</${cmd.name}:${cmd.id}>` : `\`/${name}\``;
         };
 
-
-        // masih ku tulis manual si...
-        // soalnya kalo di generate otomatis entar susah ngaturnya :v
-        // sekalian... aku cuman ngasi command yg bisa diakses semua member
-        // jadi kalo command yg cuman admin/owner ga aku masukin
-        
         const helpEmbed = new EmbedBuilder()
             .setColor('#ff0000')
-            .setTitle('━━ 🏮 BOT MENU 🏮 ━━')
-            .setThumbnail('https://media.tenor.com/hmYVvHn6-McAAAAi/genshin-impact-hu-tao.gif') // ganti pake link gif/image atau terserah
+            .setTitle('━━ 🏮 TAWBOT MENU 🏮 ━━')
+            .setThumbnail('https://media.tenor.com/hmYVvHn6-McAAAAi/genshin-impact-hu-tao.gif')
             .setDescription(
                 `Halo **${interaction.user.username}**! 👋\n` +
                 `Berikut adalah daftar perintah yang tersedia di **TawBot v2.4**.\n` +
@@ -34,12 +28,7 @@ module.exports = {
             .addFields( 
                 { 
                     name: '🚀 **UTILITY FEATURES**', 
-                    value: `>>> ${getCmd('ping')} — *Cek latensi koneksi*`,
-                    inline: false 
-                },
-                { 
-                    name: '😴 **SYSTEM**', 
-                    value: `>>> ${getCmd('afk')} — *Setel status istirahat*\n${getCmd('afk-list')} — *Daftar user yang AFK*\n${getCmd('reminder set')} — *Atur pengingat/alarm*\n${getCmd('reminder cancel')} — *Batalkan semua pengingat*`,
+                    value: `>>> ${getCmd('ping')} — *Cek latensi koneksi*\n${getCmd('afk')} — *Setel status AFK*\n${getCmd('afk-list')} — *Daftar user yang AFK*\n${getCmd('reminder set')} — *Atur pengingat/alarm*\n${getCmd('reminder cancel')} — *Batalkan semua pengingat*`,
                     inline: false 
                 },
                 { 
@@ -53,7 +42,6 @@ module.exports = {
                     inline: false
                 }
             )
-
             .setImage(bannerBot) 
             .setTimestamp()
             .setFooter({ 

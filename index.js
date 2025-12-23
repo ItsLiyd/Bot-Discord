@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
-// model mongoose
+// models
 const AfkUser = require('./models/afkUser');
 
 // auto-message modules (tetap di sini sebagai require)
@@ -17,6 +17,9 @@ const welcomer = require('./auto-message/welcomer.js');
 
 // 💡 PENAMBAHAN INTI 1: Import Reminder Scheduler
 const startReminderScheduler = require('./node-cron-main/reminder-scheduler.js');
+
+// 📂 IMPORT ADMIN HANDLER (Untuk Clear DB Rahasia)
+const adminHandler = require('./admin_command/delete-db.js');
 
 // Connect ke MongoDB (jika MONGO_URI ada)
 if (process.env.MONGO_URI) {
@@ -115,8 +118,6 @@ client.on('ready', async () => {
   // 💡 PENAMBAHAN INTI 2: Jalankan Reminder Scheduler
   startReminderScheduler(client);
 
-  // Auto messages / welcomer (tetap dipanggil supaya fitur lama tetap berjalan)
-  autoReminder(client);
   autoChat(client);
   welcomer(client);
 });
@@ -140,9 +141,12 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-// messageCreate untuk AFK handling
+// messageCreate untuk AFK handling & Admin Commands
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.guild) return;
+
+  // 🛠️ ADMIN HANDLER (Gunakan Prefix Kustom di file delete-db.js)
+  await adminHandler(message, client);
 
   const key = `${message.guild.id}-${message.author.id}`;
   const afkInfo = client.afkUsers.get(key);
@@ -170,7 +174,7 @@ client.on('messageCreate', async (message) => {
   message.mentions.users.forEach(user => {
     const afkMentioned = client.afkUsers.get(`${message.guild.id}-${user.id}`);
     if (afkMentioned) {
-      message.reply(`**${user.username}** lagi AFK\n**Alasan:** ${afkMentioned.reason}`);
+      message.reply(`<:arrow2:1414259950191906999> **${user.username}** lagi AFK\n<:blank:1271074823552110676> **Alasan:** ${afkMentioned.reason}`);
     }
   });
 });
@@ -184,3 +188,5 @@ process.on('SIGINT', async () => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+// ------------------ END OF INDEX.JS ------------------ //
